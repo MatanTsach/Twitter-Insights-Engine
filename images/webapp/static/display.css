@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #ecf0f3;
+    font-family: poppins;
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+}
+
+h2 {
+    text-align: center; /* Center the text horizontally */
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px; /* Add margin around each card */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: #f9f9f9;
+    width: 300px; /* Set a fixed width for the cards */
+}
+
+.card p {
+    margin: 5px 0; /* Add some vertical margin to paragraphs */
+}
+
+.card p b {
+    font-weight: bold;
+}
+
+.image {
+    text-align: center;
+}
+
+.image img {
+    max-width: 100%; /* Ensure images don't exceed their container's width */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.source {
+    background-color: #f0f0f0; /* Background color */
+    padding: 10px; /* Padding */
+    border: 1px solid #ccc; /* Border */
+    border-radius: 5px; /* Border radius */
+    margin-bottom: 20px; /* Bottom margin */
+    text-align: center; /* Center the text horizontally */
+}
+
+.source p {
+    margin: 0; /* Remove margin */
+    font-size: 35px; /* Font size */
+    color: #333; /* Text color */
+    text-align: center; /* Center the text horizontally */
+    font-weight: bold; /* Make the text bold */
+}
+

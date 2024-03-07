@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingestor-config
+data:
+  kaggle-dataset: mmmarchetti/tweets-dataset
+  twitter-api-endpoint: https://api.twitter.com/2/tweets/search/recent
+  ingestor-url: ingestor-service

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: matantsach/webapp:v1
+        ports:
+        - containerPort: 1000
+        env:
+        - name: ANALYZER_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: analyzer-config
+              key: analyzer-url
+        volumeMounts:
+        - name: analyzer-images-volume
+          mountPath: /app/static/analyzer-images
+      volumes:
+      - name: analyzer-images-volume
+        persistentVolumeClaim:
+          claimName: analyzer-images-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 1000
+    targetPort: 1000
+  selector:
+    app: webapp

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analyzer-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: analyzer
+  template:
+    metadata:
+      labels:
+        app: analyzer
+    spec:
+      containers:
+      - name: analyzer
+        image: matantsach/analyzer:v1
+        ports:
+        - containerPort: 2000
+        env:
+        - name: INGESTOR_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: ingestor-config
+              key: ingestor-url
+        - name: REDIS_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-url
+        - name: ANALYZER_IMAGE_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: analyzer-config
+              key: analyzer-image-path
+        volumeMounts:
+        - name: analyzer-images-volume
+          mountPath: /app/analyzer-images
+      volumes:
+      - name: analyzer-images-volume
+        persistentVolumeClaim:
+          claimName: analyzer-images-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analyzer-service
+spec:
+  selector:
+    app: analyzer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 2000

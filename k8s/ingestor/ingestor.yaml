@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestor-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ingestor
+  template:
+    metadata:
+      labels:
+        app: ingestor
+    spec:
+      containers:
+      - name: ingestor
+        image: matantsach/ingestor:v1
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REDIS_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis-url
+        - name: TWITTER_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ingestor-secret
+              key: twitter-bearer-token
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingestor-service
+spec:
+  selector:
+    app: ingestor
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000

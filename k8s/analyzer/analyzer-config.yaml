@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analyzer-config
+data:
+  analyzer-url: analyzer-service
+  analyzer-image-path: /app/analyzer-images
