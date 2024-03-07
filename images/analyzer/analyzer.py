@@ -189,7 +189,9 @@ def word_cloud(df, text):
     text = text.lower()
     matching_tweets = df[df['content'].str.lower().str.contains(text)]
     #remove text from tweets
-    matching_tweets['content'] = matching_tweets['content'].str.replace(text, '')
+    case_insensitive_regex = rf'(?i){text}'  # (?i) makes the regex match case insensitive
+    matching_tweets['content'] = matching_tweets['content'].str.replace(case_insensitive_regex, '', regex=True)
+    
     words_count = {}
     for tweet in matching_tweets['content']:
         for word in tweet.split():
@@ -202,7 +204,7 @@ def word_cloud(df, text):
     words_count = dict(sorted(words_count.items(), key=lambda item: item[1], reverse=True))
     #remove words with less than 3 characters
     words_count = {key:val for key, val in words_count.items() if len(key) > 3}
-    #keep the top 5 words      
+    #keep the top 10 words      
     words_count = dict(list(words_count.items())[:10])
 
     wordcloud = WordCloud(width = 800, height = 800,

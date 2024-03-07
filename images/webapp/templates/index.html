@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Form</title>
+    <title>Twitter Insight Engine</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
         <div class="brand-logo"></div>
-        <div class="brand-title">TWITTER</div>
+        <div class="brand-title">Twitter Insight Engine</div>
         <form method="POST" action="http://localhost:1000">
             <div class="inputs">
                 <label>Enter a text</label>
-                <input type="text" name="keywords" placeholder="exapmle: nasa is the best!" />
+                <input type="text" name="keywords" placeholder="Example: nasa is the best!" />
                 <div class="radio-buttons">
                     <input type="radio" id="option1" name="source" value="CSV">
                     <label for="option1">CSV</label>
