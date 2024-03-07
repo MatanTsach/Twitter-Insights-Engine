@@ -21,7 +21,6 @@ def ingest_csv(keyword, redis_key, redis_client):
             'language': row['language']
         })
 
-        logging.info(f"Ingested tweet: {tweet_data}")
         redis_client.rpush(redis_key, tweet_data)
 
 def ingest_api(keyword, redis_key, redis_client):

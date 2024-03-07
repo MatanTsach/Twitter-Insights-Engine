@@ -62,7 +62,7 @@ def count_tweets_containing_text_by_year(df, text):
 
     try:
         # Filter tweets containing the specified text and extract year from timestamp
-        df['year'] = pd.to_datetime(df['timestamp']).dt.year
+        df['year'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M').dt.year
         matching_tweets_by_year = (
             df[df['content'].str.lower().str.contains(lower_search_text, na=False)]
             .groupby('year')
@@ -147,7 +147,6 @@ def engagement_for_the_text(df, text):
     Returns:
     - dict: A dictionary with details about the generated image.
     """
-
     image_name = 'engagement.png'
     image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
 
@@ -155,7 +154,7 @@ def engagement_for_the_text(df, text):
     text_og = text
     text = text.lower()
     matching_tweets = df[df['content'].str.lower().str.contains(text)]
-    matching_tweets['year'] = pd.to_datetime(matching_tweets['timestamp']).dt.year
+    matching_tweets['year'] = pd.to_datetime(matching_tweets['timestamp'], format='%d/%m/%Y %H:%M').dt.year
     matching_tweets_by_year = matching_tweets.groupby('year').agg({'likes': 'sum', 'shares': 'sum'}).reset_index()
     plt.plot(matching_tweets_by_year['year'], matching_tweets_by_year['likes'], label='Likes')
     plt.plot(matching_tweets_by_year['year'], matching_tweets_by_year['shares'], label='Retweets')

@@ -17,16 +17,17 @@ def post():
     source = request.form['source']
 
     if source not in SOURCES:
+        logging.info('Invalid source')
         return "Invalid source", 400
     
-
-    if not keywords or all(char in ['.', ';', ':'] for char in keywords):
-        return "Keywords must not be empty and should contain valid characters", 400
+    if keywords and all(char in ['.', ';', ':'] for char in keywords):
+        logging.info('Invalid keywords')
+        return "Keywords should contain valid characters", 400
     
     logging.info(f'Sending to Analyzer with {keywords} and {source}')
     response = requests.get(ANALYZER_SERVICE_URL, params={'keyword': keywords, 'source': source})
-    logging.info(f'Recieved from analyzer. Starting to display insights')
 
+    logging.info(f'Recieved from analyzer. Starting to display insights')
     if response.status_code != 200:
         return "Error fetching insights", 500
     
