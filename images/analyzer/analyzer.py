@@ -3,37 +3,43 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
-def top_5_most_liked_tweets_with_text(df, text):
-    text = text.lower()
+def get_top_5_liked_tweets_containing_text(df, text):
+    """
+    Retrieves the top 5 most liked tweets that contain the specified text.
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data.
+    - text (str): Text to search for within tweet contents.
+
+    Returns:
+    - dict: A dictionary containing the title based on the search results and 
+            the top 5 most liked tweets as a list of dictionaries.
+    """
+    # Ensure the search text is in lower case for case-insensitive matching
+    search_text = text.lower()
     
     # Filter tweets that contain the specified text
-    matching_tweets = df[df['content'].str.lower().str.contains(text)]
+    matching_tweets = df[df['content'].str.lower().str.contains(search_text)]
     
     # Sort the filtered tweets by number of likes in descending order
     sorted_tweets = matching_tweets.sort_values(by='likes', ascending=False)
     
-    # Return the top 5 most liked tweets
-    top_5_tweets = sorted_tweets.head(5)
-    top_5_tweets = top_5_tweets.loc[:, ["content", "author", "likes"]]
-
-    top_5_tweets_dict = top_5_tweets.to_dict(orient='records')
+    # Select the top 5 most liked tweets and specific columns
+    top_5_tweets = sorted_tweets.head(5)[["content", "author", "likes"]]
+    top_5_tweets_list = top_5_tweets.to_dict(orient='records')
     
     # Determine the title based on the number of tweets found
-    if len(top_5_tweets_dict) < 5:
-        title = f"Only {len(top_5_tweets_dict)} tweets found" 
-    elif len(top_5_tweets_dict) == 0:
+    num_tweets_found = len(top_5_tweets_list)
+    if num_tweets_found == 0:
         title = "No tweets found"
     else:
-        title = "Top 5 most liked tweets"
-
-    json_to_return = {
+        title = f"Top {min(num_tweets_found, 5)} most liked tweets containing '{search_text}'"
+    
+    return {
         "type": "dict",
         "title": title,
-        "data": top_5_tweets_dict
-    }    
-
-    return json_to_return
-
+        "data": top_5_tweets_list
+    }
 
 def count_tweets_containing_text_by_year(df, text):
     """
@@ -87,7 +93,17 @@ def count_tweets_containing_text_by_year(df, text):
         logging.warning(f"An error occurred: {e}")
         return {}
 
-def how_many_authors_tweet_the_text(df, text):
+def plot_authors_tweet(df, text):
+    """
+    Plots the number of tweets containing a specified text by each author and saves the plot as an image.
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data.
+    - text (str): Text to search for within tweet contents.
+
+    Returns:
+    - dict: A dictionary with details about the generated image.
+    """
     text_og = text
     text = text.lower()
     
@@ -113,15 +129,25 @@ def how_many_authors_tweet_the_text(df, text):
     plt.savefig(image_path)
     plt.close()
 
-    json_to_return = {
+    return {
         "type": "image",
         "title": "Number of tweets by author",
         "name": image_name
     }
 
-    return json_to_return
-
 def engagement_for_the_text(df, text):
+    """
+    Generates a plot showing the total number of likes and retweets (shares) for tweets containing
+    a specified text, aggregated over the years, and saves it as an image.
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data with 'content', 'timestamp', 'likes', and 'shares'.
+    - text (str): Text to search for within the tweet contents.
+
+    Returns:
+    - dict: A dictionary with details about the generated image.
+    """
+
     image_name = 'engagement.png'
     image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
 
@@ -140,15 +166,24 @@ def engagement_for_the_text(df, text):
     plt.savefig(image_path)
     plt.close()
 
-    json_to_return = {
+    return {
         "type": "image",
         "title": "Engagement over the years",
         "name": image_name
     }
 
-    return json_to_return
-
 def word_cloud(df, text):
+    """
+    Generates a word cloud image from tweets containing a specified text, after excluding the search text itself,
+    and saves the image to a specified path.
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data with a 'content' column.
+    - text (str): Text to search for within the tweet contents.
+
+    Returns:
+    - dict: A dictionary with details about the generated image.
+    """
     image_name = 'wordcloud.png'
     image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
 
@@ -182,13 +217,11 @@ def word_cloud(df, text):
     plt.savefig(image_path)
     plt.close()
 
-    json_to_return = {
+    return {
         "type": "image",
         "title": "Word Cloud",
         "name": image_name
     }
-
-    return json_to_return
 
 def top_5_languages(df, text):
     """
@@ -225,9 +258,9 @@ def top_5_languages(df, text):
 
 def analyze(text, data):
     df = pd.DataFrame(data)
-    insights = [top_5_most_liked_tweets_with_text, 
+    insights = [get_top_5_liked_tweets_containing_text, 
                 count_tweets_containing_text_by_year, 
-                how_many_authors_tweet_the_text,
+                plot_authors_tweet,
                 engagement_for_the_text,
                 word_cloud, 
                 top_5_languages]
