@@ -1,4 +1,4 @@
-import requests, os, logging, json
+import requests, os, logging, json, random
 from flask import Flask, request
 from analyzer import analyze
 from redis import Redis
@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 def fetch_data_from_redis(key):
     # Fetch and deserialize data from Redis
     return [json.loads(row) for row in redis_client.lrange(key, 0, -1)]
+
+def generate_analysis_key():
+    return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=25))
 
 @app.route('/', methods=['GET'])
 def get():
@@ -36,11 +39,14 @@ def get():
         return "No Data found for keyword", 404
 
     logging.info(f'Beginning analysis of {keyword} from {source}')
-    insights = analyze(keyword, data)
+
+    # Generate analysis key, will be saved in a folder in the mounted pvc with the same name
+    analysis_key = generate_analysis_key()
+    insights = analyze(keyword, data, analysis_key)
     logging.info(insights)
     logging.info('Analysis complete. Returning insights.')
 
-    return insights, 200
+    return [analysis_key, insights], 200
     
 
 if __name__ == '__main__':

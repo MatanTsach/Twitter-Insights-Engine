@@ -1,6 +1,6 @@
 import logging
 
-def visualize_insights(insights, keywords, source):
+def visualize_insights(analysis_key, insights, keywords, source):
     raw_html = f"""
             <div class='source'>
             <p>Insights for keywords: <span style='color: #1DA1F2;'>{keywords}</span>
@@ -23,7 +23,7 @@ def visualize_insights(insights, keywords, source):
         elif insight_type == 'image':
             raw_html += f"<div class='image'>\n"
             raw_html += f"<h2>{insight.get('title')}</h2>\n"
-            raw_html += f"<img src='static/analyzer-images/{insight.get('name')}' alt='Image'>\n"
+            raw_html += f"<img src='static/analyzer-images/{analysis_key}/{insight.get('name')}' alt='Image'>\n"
             raw_html += "</div>\n"
         else:
             logging.warning(f"Unknown insight type: {insight_type}")

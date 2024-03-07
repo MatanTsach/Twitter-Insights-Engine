@@ -32,8 +32,11 @@ def post():
         return "Error fetching insights", 500
     
     insights = response.json()
-    insights_html = visualize_insights(insights, keywords, source)
-
+    
+    analysis_key = insights[0]
+    insights = insights[1]
+    insights_html = visualize_insights(analysis_key, insights, keywords, source)
+    
     return render_template('insights.html', insights=insights_html)
 
 @app.route('/', methods=['GET'])

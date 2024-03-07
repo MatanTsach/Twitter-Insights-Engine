@@ -41,7 +41,7 @@ def get_top_5_liked_tweets_containing_text(df, text):
         "data": top_5_tweets_list
     }
 
-def count_tweets_containing_text_by_year(df, text):
+def count_tweets_containing_text_by_year(df, text, image_path):
     """
     Counts how many times a specified text appears in tweets by year, plots the results, 
     and saves the plot to an image file.
@@ -58,7 +58,7 @@ def count_tweets_containing_text_by_year(df, text):
 
     # Prepare image file path and name
     image_name = 'tweets_by_year.png'
-    image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
+    path = os.path.join(image_path, image_name)
 
     try:
         # Filter tweets containing the specified text and extract year from timestamp
@@ -80,7 +80,7 @@ def count_tweets_containing_text_by_year(df, text):
         plt.yticks(fontsize=12)
 
         # Save the plot
-        plt.savefig(image_path)
+        plt.savefig(path)
         plt.close()
 
         return {
@@ -93,7 +93,7 @@ def count_tweets_containing_text_by_year(df, text):
         logging.warning(f"An error occurred: {e}")
         return {}
 
-def plot_authors_tweet(df, text):
+def plot_authors_tweet(df, text, image_path):
     """
     Plots the number of tweets containing a specified text by each author and saves the plot as an image.
 
@@ -108,7 +108,7 @@ def plot_authors_tweet(df, text):
     text = text.lower()
     
     image_name = 'count_authors.png'
-    image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
+    path = os.path.join(image_path, image_name)
 
     # Filter tweets that contain the specified text
     matching_tweets = df[df['content'].str.lower().str.contains(text)]
@@ -126,7 +126,7 @@ def plot_authors_tweet(df, text):
     plt.xticks(rotation=45, ha='right')  # Rotate the x-labels by 45 degrees and align them to the right
     plt.tight_layout()  # Adjust layout to prevent overlap
 
-    plt.savefig(image_path)
+    plt.savefig(path)
     plt.close()
 
     return {
@@ -135,7 +135,7 @@ def plot_authors_tweet(df, text):
         "name": image_name
     }
 
-def engagement_for_the_text(df, text):
+def engagement_for_the_text(df, text, image_path):
     """
     Generates a plot showing the total number of likes and retweets (shares) for tweets containing
     a specified text, aggregated over the years, and saves it as an image.
@@ -148,7 +148,7 @@ def engagement_for_the_text(df, text):
     - dict: A dictionary with details about the generated image.
     """
     image_name = 'engagement.png'
-    image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
+    path = os.path.join(image_path, image_name)
 
     # polt the number of likes, retweets for the specified text over the years
     text_og = text
@@ -162,7 +162,7 @@ def engagement_for_the_text(df, text):
     plt.ylabel('Engagement')
     plt.title('Engagement for the text: ' + text_og + ' over the years')
     plt.legend()
-    plt.savefig(image_path)
+    plt.savefig(path)
     plt.close()
 
     return {
@@ -171,7 +171,7 @@ def engagement_for_the_text(df, text):
         "name": image_name
     }
 
-def word_cloud(df, text):
+def word_cloud(df, text, image_path):
     """
     Generates a word cloud image from tweets containing a specified text, after excluding the search text itself,
     and saves the image to a specified path.
@@ -184,14 +184,14 @@ def word_cloud(df, text):
     - dict: A dictionary with details about the generated image.
     """
     image_name = 'wordcloud.png'
-    image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), image_name)
+    path = os.path.join(image_path, image_name)
 
     text = text.lower()
     matching_tweets = df[df['content'].str.lower().str.contains(text)]
     #remove text from tweets
     case_insensitive_regex = rf'(?i){text}'  # (?i) makes the regex match case insensitive
     matching_tweets['content'] = matching_tweets['content'].str.replace(case_insensitive_regex, '', regex=True)
-    
+
     words_count = {}
     for tweet in matching_tweets['content']:
         for word in tweet.split():
@@ -215,7 +215,7 @@ def word_cloud(df, text):
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.tight_layout(pad = 0)
-    plt.savefig(image_path)
+    plt.savefig(path)
     plt.close()
 
     return {
@@ -257,16 +257,45 @@ def top_5_languages(df, text):
     }
 
 
-def analyze(text, data):
+def get_text_insights(df, text):
+    """
+    Retrieves insights that are text-based
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data.
+    - text (str): Text to search for within tweet content.
+
+    Returns:
+    - list: A list of insights
+    """
+
+
+    text_insights = [get_top_5_liked_tweets_containing_text, top_5_languages]
+    return [insight(df, text) for insight in text_insights]
+
+def get_plots_insights(df, text, image_path):
+    """
+    Retrieves insights that are plot-based
+
+    Parameters:
+    - df (pandas.DataFrame): DataFrame containing tweet data.
+    - text (str): Text to search for within tweet content.
+    - image_path (str): Path to save the generated images.
+
+    Returns:
+    - list: A list of insights
+    """
+    plots_insights = [count_tweets_containing_text_by_year, plot_authors_tweet, engagement_for_the_text, word_cloud]
+    return [insight(df, text, image_path) for insight in plots_insights]
+
+def analyze(text, data, analysis_key):
     df = pd.DataFrame(data)
-    insights = [get_top_5_liked_tweets_containing_text, 
-                count_tweets_containing_text_by_year, 
-                plot_authors_tweet,
-                engagement_for_the_text,
-                word_cloud, 
-                top_5_languages]
+    image_path = os.path.join(os.getenv('ANALYZER_IMAGE_PATH'), analysis_key)
     
-    return [insight(df, text) for insight in insights]
+    # Creating the directory in the mounted path.
+    os.makedirs(image_path, exist_ok=True)
+
+    return get_text_insights(df, text) + get_plots_insights(df, text, image_path)
 
 
     
